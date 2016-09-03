@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+        <link rel="stylesheet" href="style.css">
+       <script data-main="scripts/main" src="javascripts/lib/require.js"></script>
+       <title>Discrete Event Road Traffic Simulator Test</title>
+
+</head>
+<body>
+<div>
+           <canvas id="canvas" width="800" height="600"></canvas>
+       </div>
+   <div>
+         <button type="button" onclick="app.world.save()">save</button>
+         <button type="button" onclick="app.world.load()">load</button>
+         <button type="button" onclick="app.world.clear()">clear</button>
+        <button type = "button" onclick="app.world.addRandomCar()">add car</button>
+        <button type="button" onclick="app.world.removeAllCars()">remove all cars</button>
+        </div>
+</body>
+</html>
