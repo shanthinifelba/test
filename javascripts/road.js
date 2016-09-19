@@ -1,7 +1,7 @@
 /**
  * Created by rajendr on 02/09/16.
  */
-define([], function() {
+define(["utils"], function(utils) {
         function Road(source, target) {
               this.id = window.__next_id++;
                 if (source instanceof Object) {
@@ -14,7 +14,17 @@ define([], function() {
                    } else {
                        this.target = target;
                    }
-           }
+           };
+           //considering road length when moving cars
+            Road.prototype.getLength = function () {
+                return utils.getDistance(this.getSource(),this.getTarget());
+            };
+            Road.prototype.getSource = function () {
+                return app.world.getJunction(this.source);
+            };
+            Road.prototype.getTarget = function () {
+                return app.world.getJunction(this.target);
+            };
 
             return Road;
     });

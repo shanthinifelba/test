@@ -1,7 +1,7 @@
 /**
  * Created by rajendr on 02/09/16.
  */
-define(["underscore", "car", "utils"], function(_, Car, utils) {
+define(["underscore", "car", "utils","junction","road"], function(_, Car,Junction, Road, utils) {
        function World(o) {
                this.set(o);
            }
@@ -11,6 +11,7 @@ define(["underscore", "car", "utils"], function(_, Car, utils) {
                 this.roads = o.roads || {};
                 this.cars = o.cars || {};
                this.junctions = o.junctions || {};
+               this.ticks = o.ticks || 0;
                window.__next_id = o.__next_id || 1;
             };
 
@@ -23,11 +24,21 @@ define(["underscore", "car", "utils"], function(_, Car, utils) {
                 var data = utils.readCookie("world");
                 if (data) {
                         this.set(JSON.parse(data));
+                    //convert into objects at the time of deserialization
+                    $.each(this.junctions, function (index,junction) {
+                        junction.__proto__ = Junction.prototype;
+                    })
+                    $.each(this.roads, function (index,road) {
+                        road.__proto__ = Road.prototype;
+                    })
+                    $.each(this.cars, function (index,car) {
+                        car.__proto__= Car.prototype;
+                    })
                     }
             };
 
             World.prototype.clear = function() {
-                return this.junctions[id];
+                return this.set({});
             };
 
             World.prototype.addRandomCar = function(){
@@ -53,35 +64,36 @@ define(["underscore", "car", "utils"], function(_, Car, utils) {
 
                 World.prototype.onTick = function() {
                 var self = this;
+                    this.ticks++;
+                    $map(this.junctions, function (junction) {
+                        junction.onTick(self.ticks);
+                    });
                 $.each(this.cars, function(index, car) {
-                        car.position += 0.01 * car.direction;
+
+                        var road = car.getRoad(car.road);
+                        car.position = car.position + 2*car.speed  / road.getLength();
                         var junction = null;
-                        var road = self.getRoad(car.road);
                         if (car.position >= 1) {
-                                junction = self.getJunction(road.target);
+                                junction = road.getTarget();
+                                car.position = 1;
                             } else if (car.position <= 0) {
-                                junction = self.getJunction(road.source);
+                                junction = road.getSource();
+                                car.position = 0;
                            }
                         if (junction != null) {
-                                var possibleRoads = junction.roads.filter(function(x) { return x !== road.id; });
+                            if(junction.state) {
+                                var possibleRoads = junction.getRoads().filter(function (x) {
+                                    return x.target !== road.source;
+                                });
                                 if (possibleRoads.length == 0) {
-                                        // TODO: we can just remove a car out of the map
-                                            possibleRoads = junction.roads;
-                                    }
-                                var nextRoadId = _.sample(possibleRoads);
-                                var nextRoad = self.getRoad(nextRoadId);
-                                car.road = nextRoadId;
-                                if (nextRoad.source === junction.id) {
-                                        car.position = 0;
-                                        car.direction = 1;
-                                    } else if (nextRoad.target === junction.id) {
-                                        car.position = 1;
-                                        car.direction = -1;
-                                    } else {
-                                        console.log(nextRoad);
-                                        console.log(junction);
-                                        console.log("Error!");
-                                   }
+                                    // TODO: we can just remove a car out of the map
+                                    possibleRoads = junction.getRoads();
+                                }
+                                var nextRoad = _.sample(possibleRoads);
+                                car.road = nextRoad.id;
+                                car.position = 0;
+                            }
+
                             }
                     });
             };
@@ -89,7 +101,7 @@ define(["underscore", "car", "utils"], function(_, Car, utils) {
             World.prototype.addRoad = function(road) {
                 this.roads[road.id] = road;
                 this.junctions[road.source].roads.push(road.id);
-                this.junctions[road.target].roads.push(road.id);
+
             };
 
             World.prototype.getRoad = function(id) {
@@ -111,6 +123,13 @@ define(["underscore", "car", "utils"], function(_, Car, utils) {
             World.prototype.getJunction = function(id) {
                     return this.junctions[id];
                };
+        World.prototype.addRandomCar = function () {
+            var road = _.sample(this.roads);
+            this.addCar(new Car(road.id, Math.random()));
+        };
+        World.prototype.removeAllCars = function () {
+            this.cars = {};
+        };
 
            return World;
     });

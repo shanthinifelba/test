@@ -1,7 +1,7 @@
 /**
  * Created by rajendr on 02/09/16.
  */
-define(["jquery", "underscore", "road", "junction", "utils"], function($, _, Road, Junction, utils) {
+define(["jquery", "road", "junction", "utils"], function($, Road, Junction, utils) {
         function Visualizer(world) {
             this.THICKNESS = 15;
             this.world = world;
@@ -12,6 +12,17 @@ define(["jquery", "underscore", "road", "junction", "utils"], function($, _, Roa
             this.mouseDown = false;
             this.tempLine = null;
             this.dragJunction = null;
+            this.colors = {
+                           background: "#fdfefe",
+                           redLight: "#d03030",
+                           greenLight: "60a040",
+                           junction: "#644",
+                           draggedJunction: "blue",
+                           road: "#776",
+                           car: "#333",
+                           hoveredJunction: "black",
+                           tempLine: "#a4a",
+                       };
             var self = this;
 
             this.canvas.addEventListener("mousedown", function (e) {
@@ -36,8 +47,11 @@ define(["jquery", "underscore", "road", "junction", "utils"], function($, _, Roa
             if (self.tempLine) {
                 var junction = self.world.getNearestJunction(utils.getPoint(e), self.THICKNESS);
                 if (junction) {
-                    var road = new Road(self.tempLine.source, junction);
-                    self.world.addRoad(road);
+                    //making roads bidirectional by assigning road 1 and road 2 as opposites of each other
+                    var road1 = new Road(self.tempLine.source, junction);
+                    self.world.addRoad(road1);
+                    var road2 = new Road(junction,self.tempLine.source);
+                    self.world.addRoad(road2);
                 }
                 self.tempLine = null;
             }
@@ -68,9 +82,9 @@ define(["jquery", "underscore", "road", "junction", "utils"], function($, _, Roa
                     this.canvas.addEventListener("mousemove", function(e) {
                             var point = utils.getPoint(e);
                             var nearestJunction = self.world.getNearestJunction(point, self.THICKNESS);
-                            _.map(self.world.junctions, function(junction) { junction.color = null; });
+                            $.map(self.world.junctions, function(junction) { junction.color = null; });
                             if (nearestJunction) {
-                                   nearestJunction.color = "red";
+                                   nearestJunction.color = self.colors.hoveredJunction;
                                 }
                         if (self.tempLine) {
                                         self.tempLine = utils.line(self.startJunction, utils.getPoint(e));
@@ -95,7 +109,14 @@ define(["jquery", "underscore", "road", "junction", "utils"], function($, _, Roa
 
         Visualizer.prototype.drawJunction = function(c, color) {
                this.ctx.beginPath();
-                this.ctx.fillStyle = c.color || color;
+                if(c.color){
+                    color = c.color;
+                } else if(c.state == Junction.prototype.STATE.RED){
+                    color = this.colors.redLight;
+                } else if(c.state == Junction.prototype.STATE.GREEN){
+                    color = this.colors.greenLight;
+                }
+                this.ctx.fillStyle = color;
                 this.ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
                 this.ctx.fill();
             }
@@ -103,15 +124,21 @@ define(["jquery", "underscore", "road", "junction", "utils"], function($, _, Roa
         Visualizer.prototype.drawLine = function(point1, point2, color) {
                 this.ctx.beginPath();
                 this.ctx.strokeStyle = color;
-                this.ctx.moveTo(point1.x, point1.y);
-                this.ctx.lineTo(point2.x, point2.y);
+                var offset = 0;
+                // FIX ME: dirty hack, should be replaced with a graph - drawing library
+                if(point1.x < point2.x){
+                    offset = 2;
+                } else {
+                    offset = -2;
+                }
+                this.ctx.moveTo(point1.x + offset, point1.y + offset);
+                this.ctx.lineTo(point2.x + offset, point2.y + offset);
                 this.ctx.stroke();
             }
 
         Visualizer.prototype.getCarPositionOnRoad = function(roadId, position) {
                 var road = this.world.getRoad(roadId);
-                var source = this.world.getJunction(road.source),
-                        target = this.world.getJunction(road.target);
+                var source = road.getSource(), target = road.getTarget();
                 var dx = target.x - source.x,
                         dy = target.y - source.y;
                 return {
@@ -123,27 +150,28 @@ define(["jquery", "underscore", "road", "junction", "utils"], function($, _, Roa
             Visualizer.prototype.drawCar = function(car) {
                 var point = this.getCarPositionOnRoad(car.road, car.position);
                 this.ctx.beginPath();
-                this.ctx.fillStyle = "green";
+                this.ctx.fillStyle = this.colors.car;
                 this.ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
                 this.ctx.fill();
             }
 
         Visualizer.prototype.draw = function() {
-            this.ctx.clearRect(0, 0, this.width, this.height);
+            this.ctx.fillStyle = this.colors.background;
+            this.ctx.fillRect(0,0,this.width, this.height);
             var self = this;
             $.each(this.world.roads, function (index, road) {
                 var source = self.world.getJunction(road.source),
                     target = self.world.getJunction(road.target);
-                self.drawLine(source, target, "666");
+                self.drawLine(source, target, self.colors.road);
             });
             $.each(this.world.junctions, function (index, junction) {
-                self.drawJunction(junction, "#666");
+                self.drawJunction(junction, self.colors.junction);
             });
             $.each(this.world.cars, function (index, car) {
                 self.drawCar(car);
             });
             if (self.tempLine) {
-                self.drawLine(self.tempLine.source, self.tempLine.target, "#aaa");
+                self.drawLine(self.tempLine.source, self.tempLine.target, self.colors.tempLine);
             }
 
 
