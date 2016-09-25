@@ -7,7 +7,9 @@ define(["underscore", "car", "utils","junction","road","pool"], function(_, Car,
            }
 
            World.prototype.set = function(o) {
-                (o !== undefined) || (o = {});
+                if(o === undefined){
+                    o = {};
+                }
                 this.roads = o.roads || new Pool();
                 this.cars = o.cars || new Pool();
                this.junctions = o.junctions || new Pool();
@@ -17,13 +19,13 @@ define(["underscore", "car", "utils","junction","road","pool"], function(_, Car,
 
             World.prototype.save = function() {
                 return; //TODO
-                this.__next_id = window.__next_id;
-                utils.createCookie("world", JSON.stringify(this));
+                /*this.__next_id = window.__next_id;
+                utils.createCookie("world", JSON.stringify(this));*/
             };
 
             World.prototype.load = function() {
                 return; //TODO
-                var data = utils.readCookie("world");
+               /* var data = utils.readCookie("world");
                 if (data) {
                         this.set(JSON.parse(data));
                     //convert into objects at the time of deserialization
@@ -36,7 +38,7 @@ define(["underscore", "car", "utils","junction","road","pool"], function(_, Car,
                     $.each(this.cars, function (index,car) {
                         car.__proto__= Car.prototype;
                     })
-                    }
+                    }*/
             };
 
             World.prototype.clear = function() {
@@ -53,15 +55,7 @@ define(["underscore", "car", "utils","junction","road","pool"], function(_, Car,
 
             }
 
-            World.prototype.getNearestJunction = function(point, maxDistance) {
-                maxDistance = maxDistance || Infinity;
-                if (!this.junctions.all())
-                        return null;
-                var junction = _.min(this.junctions.all(), function(junction) {
-                        return utils.getDistance(point, junction);
-                    });
-                return utils.getDistance(point, junction) < maxDistance ? junction : null;
-           };
+
 
 
                 World.prototype.onTick = function() {
@@ -82,12 +76,12 @@ define(["underscore", "car", "utils","junction","road","pool"], function(_, Car,
                                 junction = road.getSource();
                                 car.position = 0;
                            }
-                        if (junction != null) {
+                        if (junction !== null) {
                             if(junction.state) {
                                 var possibleRoads = junction.getRoads().filter(function (x) {
                                     return x.target !== road.source;
                                 });
-                                if (possibleRoads.length == 0) {
+                                if (possibleRoads.length === 0) {
                                     // TODO: we can just remove a car out of the map
                                     possibleRoads = junction.getRoads();
                                 }

@@ -14,7 +14,7 @@ define(["utils"], function(utils) {
                    } else {
                        this.target = target;
                    }
-           };
+           }
            //considering road length when moving cars
             Road.prototype.getLength = function () {
                 return utils.getDistance(this.getSource(),this.getTarget());

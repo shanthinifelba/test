@@ -1,17 +1,17 @@
 /**
  * Created by rajendr on 02/09/16.
  */
+//latest modification - junctions are rectangles now
 
 define(["underscore"],function(_){
-    function Junction(point) {
+    function Junction(rect) {
         this.id = window.__next_id++;
-        this.x = point.x;
-        this.y = point.y;
+        this.rect = rect;
         this.roads = [];
         this.state = this.STATE.RED;
         this.flipInterval = _.random(10,50); //defining a random  flip interval for lights
 
-    };
+    }
     Junction.prototype.STATE = {
         RED: 0,
         GREEN:1,

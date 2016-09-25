@@ -5,7 +5,7 @@
 define(["jquery"], function ($) {
     function Pool() {
         this.objects = {};
-    };
+    }
     
     Pool.prototype.get = function (id) {
         return this.objects[id];
