@@ -8,7 +8,7 @@ require.config({
             },
 });
 
-    require(["app"]);
+    //require(["app"]); .// this is unnecessary dupllicate require app call
 
     require(["jquery", "app"], function($, App) {
            $(document).ready(function () {

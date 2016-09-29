@@ -1,19 +1,19 @@
 {
-  "name": "application-name",
-
-  "version": "0.0.1",
+  "name": "traffic-simulator",
+  "version": "0.0.0",
   "description": "Simulator of road networks with signal-controlled intersections",
+  "main": "index.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "echo \"Error: No test specified \" && exit 1"
   },
   "author": {
-    "name": "Artem Volkhin",
-    "email": "artem@volkhin.com",
-    "url": "http://volkhin.com/"
+    "name": "Shanthini Rajendran",
+    "email": "rajendr@rajendr.com",
+    "url": "http://rajendr.com/"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/volkhin/RoadTrafficSimulator.git"
+    "url": "git://github.com/shanthinifelba/test.git"
   },
   "config": {
     "blanket": {
@@ -27,26 +27,9 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "blanket": "~1.1",
-    "browserify": "~4.1",
-    "chai": "~1.9",
-    "chroma-js": "^0.5.7",
-    "coffee-script": "~1.7",
-    "coffeeify": "~0.6",
-    "dat-gui": "~0.5",
-    "gulp": "~3.8",
-    "gulp-coffee": "~2.0",
-    "gulp-coffeelint": "~0.3",
-    "gulp-concat": "~2.2",
-    "gulp-mocha": "~0.4",
-    "gulp-notify": "~1.3",
-    "gulp-plumber": "~0.6",
-    "gulp-rename": "~1.2",
-    "gulp-uglify": "~0.3",
-    "gulp-util": "~2.2",
-    "jquery": "~2.1",
-    "jquery-mousewheel": "~3.1",
-    "underscore": "~1.6",
-    "vinyl-source-stream": "~0.1"
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-jasmine": "^0.6.4",
+    "grunt-contrib-requirejs": "^0.4.4",
+    "grunt-contrib-watch":"^0.6.1"
   }
 }
